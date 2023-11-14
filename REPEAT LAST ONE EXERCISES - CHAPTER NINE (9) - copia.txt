@@ -1,0 +1,39 @@
+Exercise 9-1
+Construct a query against the film table that uses a filter condition with a noncorre‐
+lated subquery against the category table to find all action films (category.name =
+'Action').
+
+mysql> SELECT F.TITLE FROM FILM F WHERE FILM_ID IN (SELECT FC.FILM_ID FROM FILM_CATEGORY FC INNER JOIN CATEGORY C ON FC.category_id=C.category_id WHERE C.NAME = 'ACTION');
+
+Exercise 9-2
+Rework the query from Exercise 9-1 using a correlated subquery against the category
+and film_category tables to achieve the same results.
+
+
+mysql> SELECT F.TITLE FROM FILM F WHERE EXISTS ( SELECT 1 FROM FILM_CATEGORY FC INNER JOIN CATEGORY C ON FC.CATEGORY_ID = C.CATEGORY_ID WHERE NAME = 'ACTION' AND F.FILM_ID = FC.FILM_ID);
+
+(repeat)Exercise 9-3
+Join the following query to a subquery against the film_actor table to show the level
+of each actor:
+SELECT 'Hollywood Star' level, 30 min_roles, 99999 max_roles
+UNION ALL
+SELECT 'Prolific Actor' level, 20 min_roles, 29 max_roles
+UNION ALL
+SELECT 'Newcomer' level, 1 min_roles, 19 max_roles
+The subquery against the film_actor table should count the number of rows for each
+actor using group by actor_id, and the count should be compared to the
+min_roles/max_roles columns to determine which level each actor belongs to.
+mysql> SELECT actr.actor_id, grps.level
+-> FROM
+-> (SELECT actor_id, count(*) num_roles
+-> FROM film_actor
+-> GROUP BY actor_id
+-> ) actr
+-> INNER JOIN
+-> (SELECT 'Hollywood Star' level, 30 min_roles, 99999 max_roles
+-> UNION ALL
+-> SELECT 'Prolific Actor' level, 20 min_roles, 29 max_roles
+-> UNION ALL
+-> SELECT 'Newcomer' level, 1 min_roles, 19 max_roles
+-> ) grps
+-> ON actr.num_roles BETWEEN grps.min_roles AND grps.max_roles;
